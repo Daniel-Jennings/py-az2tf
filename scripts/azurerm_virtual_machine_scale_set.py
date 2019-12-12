@@ -62,8 +62,8 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
             #vmoswa = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["writeAcceleratorEnabled"]
             #
-            osvhd = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["ssh"]["publicKeys"][0]["keyData"]
-            #
+            
+           #
             #vmimid = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["imageReference"]["id"]
 
 
@@ -120,6 +120,7 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
     # os_profile_windows_config
             try:  # winb
+                osvhd = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"] 
                 winb = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"]
                 vmwau = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"]["enableAutomaticUpdates"]
                 vmwvma = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"]["provisionVmAgent"]
@@ -144,6 +145,7 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
 
             try:  # linuxb" try :
+                osvhd = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["ssh"]["publicKeys"][0]["keyData"]
                 linuxb = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]
                 vmdispw = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["disablePasswordAuthentication"]
                 vmsshpath = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["ssh"]["publicKeys"][0]["path"]
@@ -190,7 +192,10 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
                             ipcsrg = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["subnet"]["id"].split("/")[4].replace(".", "-").lower()
                             ipcsn = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["subnet"]["id"].split("/")[10].replace(".", "-")
-                            beapids = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["loadBalancerBackendAddressPools"]
+                            try:
+                                beapids = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["loadBalancerBackendAddressPools"]
+                            except KeyError:
+                                pass
                             #natrids = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["loadBalancerInboundNatPools"]
 
                             fr.write('\t\tname = "' + ipcn + '"\n')
@@ -213,18 +218,22 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
     # storage_profile_os_disk  block
             try:
-                vmosdiskname = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["name"]
                 vmosdiskcache = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["caching"]
                 vmoscreoption = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["createOption"]
-
+                
                 fr.write('storage_profile_os_disk {\n')
-                fr.write('\tname = "' + vmosdiskname + '"\n')
                 fr.write('\tcaching = "' + vmosdiskcache + '"\n')
+                fr.write('\tcreate_option = "' + vmoscreoption + '"\n')
+                
+                try:
+                    vmosdiskname = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["name"]
+                    fr.write('\tname = "' + vmosdiskname + '"\n')
+                except KeyError:
+                    pass
+                
                 # look at this
                 # if vmosacctype != "" :
                 ##    fr.write('\tmanaged_disk_type = "' +   vmosacctype + '"\n')
-
-                fr.write('\tcreate_option = "' + vmoscreoption + '"\n')
 
                 try:
                     vmtype = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["osType"]
@@ -232,21 +241,20 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
                     vmtype = ""
                     pass
                 fr.write('\tos_type = "' + vmtype + '"\n')
-
+               
                 try:
                     vmoswa = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["writeAcceleratorEnabled"]
                     fr.write('\t write_accelerator_enabled = ' + str(vmoswa).lower() + '\n')
                 except KeyError:
                     pass
-
-
+                
                 try:
                     vmosvhdc = str(ast.literal_eval(json.dumps(azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["vhdContainers"])))
                     vmosvhdc=vmosvhdc.replace("'",'"')
                     fr.write('\tvhd_containers = ' + vmosvhdc + '\n')
                 except KeyError:
                     pass
-
+                
                 fr.write('}\n')
                 #
             except KeyError:
@@ -325,35 +333,35 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
         
 
     # extensions:
-            try:
-                vmexts = azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"]
-                dcount = len(vmexts)
-                for j in range(0, dcount):
-                    vmextn=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["name"]
-                    fr.write('extension {\n')
-                    fr.write('\t name = "' + vmextn + '"\n')
-                    vmextpub=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["publisher"]
-                    vmexttyp=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["type"]
-                    vmextthv=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["typeHandlerVersion"]
+            # try:
+                # vmexts = azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"]
+                # dcount = len(vmexts)
+                # for j in range(0, dcount):
+                    # vmextn=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["name"]
+                    # fr.write('extension {\n')
+                    # fr.write('\t name = "' + vmextn + '"\n')
+                    # vmextpub=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["publisher"]
+                    # vmexttyp=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["type"]
+                    # vmextthv=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["typeHandlerVersion"]
                     
-                    fr.write('\t publisher = "' + vmextpub + '"\n')
-                    fr.write('\t type = "' + vmexttyp + '"\n')
-                    fr.write('\t type_handler_version = "' + vmextthv + '"\n')
-                    fr.write('\t protected_settings = ""\n')    
+                    # fr.write('\t publisher = "' + vmextpub + '"\n')
+                    # fr.write('\t type = "' + vmexttyp + '"\n')
+                    # fr.write('\t type_handler_version = "' + vmextthv + '"\n')
+                    # fr.write('\t protected_settings = ""\n')    
                     
-                    try:
-                        vmextset=str(ast.literal_eval(json.dumps(azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["settings"])))
-                        vmextset=vmextset.replace("'",'\\"')
-                        #print "vmextsett=" + vmextset
+                    # try:
+                        # vmextset=str(ast.literal_eval(json.dumps(azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["settings"])))
+                        # vmextset=vmextset.replace("'",'\\"')
+                        # #print "vmextsett=" + vmextset
                     
-                        fr.write('\t settings="' + vmextset + '"\n')                           
+                        # fr.write('\t settings="' + vmextset + '"\n')                           
 
-                    except KeyError:
-                        pass
+                    # except KeyError:
+                        # pass
                     
-                    fr.write('}\n')
-            except KeyError:
-                pass
+                    # fr.write('}\n')
+            # except KeyError:
+                # pass
 
 
 

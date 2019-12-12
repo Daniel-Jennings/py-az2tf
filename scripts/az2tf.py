@@ -58,7 +58,7 @@ import azurerm_container_registry  #v12
 import azurerm_kubernetes_cluster
 import azurerm_recovery_services_vault #v12
 import azurerm_virtual_machine  #v12
-import azurerm_virtual_machine_extension  #v12
+#import azurerm_virtual_machine_extension  #v12
 import azurerm_virtual_machine_scale_set #v12
 
 import azurerm_automation_account  #v12
@@ -378,7 +378,7 @@ azurerm_recovery_services_vault.azurerm_recovery_services_vault(crf,cde,crg,head
 # 290_azurerm_virtual_machine
 azurerm_virtual_machine.azurerm_virtual_machine(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
 # 290_azurerm_virtual_machine_extension
-azurerm_virtual_machine_extension.azurerm_virtual_machine_extension(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
+# azurerm_virtual_machine_extension.azurerm_virtual_machine_extension(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
 # 295_azurerm_virtual_machine_scale_set
 azurerm_virtual_machine_scale_set.azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
 # 310_azurerm_automation_account

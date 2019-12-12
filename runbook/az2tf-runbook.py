@@ -4847,126 +4847,126 @@ def azurerm_virtual_machine(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldu
 # azurerm_virtual_machine_extension
 #
 # azurerm_virtual_machine
-def azurerm_virtual_machine_extension(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl):
-    tfp="azurerm_virtual_machine_extension"
-    tcode="291-"
-    azr=""
+# def azurerm_virtual_machine_extension(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl):
+    # tfp="azurerm_virtual_machine_extension"
+    # tcode="291-"
+    # azr=""
     
-    if crf in tfp:
-    # REST or cli
-        # print "REST"
-        url="https://" + cldurl + "/subscriptions/" + sub + "/providers/Microsoft.Compute/virtualMachines"
-        params = {'api-version': '2019-03-01'}
-        r = requests.get(url, headers=headers, params=params)
-        azr= r.json()["value"]
+    # if crf in tfp:
+    # # REST or cli
+        # # print "REST"
+        # url="https://" + cldurl + "/subscriptions/" + sub + "/providers/Microsoft.Compute/virtualMachines"
+        # params = {'api-version': '2019-03-01'}
+        # r = requests.get(url, headers=headers, params=params)
+        # azr= r.json()["value"]
 
 
-        tfrmf=tcode+tfp+"-staterm.sh"
-        tfimf=tcode+tfp+"-stateimp.sh"
-        tfrm=open(tfrmf, 'a')
-        tfim=open(tfimf, 'a')
-        print ("# " + tfp,)
-        count=len(azr)
-        print (count)
-        for i in range(0, count):
+        # tfrmf=tcode+tfp+"-staterm.sh"
+        # tfimf=tcode+tfp+"-stateimp.sh"
+        # tfrm=open(tfrmf, 'a')
+        # tfim=open(tfimf, 'a')
+        # print ("# " + tfp,)
+        # count=len(azr)
+        # print (count)
+        # for i in range(0, count):
 
-            name=azr[i]["name"]
-            loc=azr[i]["location"]
-            id=azr[i]["id"]
-            rg=id.split("/")[4].replace(".","-").lower()
-            if rg[0].isdigit(): rg="rg_"+rg
-            rgs=id.split("/")[4].lower()
-            try:
-                res=azr[i]["resources"]
-                rname=name.replace(".","-")
-                if crg is not None:
-                    if rgs.lower() != crg.lower():
-                        continue  # back to for        
-                #
-                icount=len(res)
+            # name=azr[i]["name"]
+            # loc=azr[i]["location"]
+            # id=azr[i]["id"]
+            # rg=id.split("/")[4].replace(".","-").lower()
+            # if rg[0].isdigit(): rg="rg_"+rg
+            # rgs=id.split("/")[4].lower()
+            # try:
+                # res=azr[i]["resources"]
+                # rname=name.replace(".","-")
+                # if crg is not None:
+                    # if rgs.lower() != crg.lower():
+                        # continue  # back to for        
+                # #
+                # icount=len(res)
 
             
-                if icount > 0 :
+                # if icount > 0 :
                     
-                    for j in range(0,icount):
+                    # for j in range(0,icount):
                 
-                        url="https://" + cldurl + "/subscriptions/" + sub + "/resourceGroups/" + rg + "/providers/Microsoft.Compute/virtualMachines/"+name+"/extensions"
+                        # url="https://" + cldurl + "/subscriptions/" + sub + "/resourceGroups/" + rg + "/providers/Microsoft.Compute/virtualMachines/"+name+"/extensions"
                     
-                        params = {'api-version': '2019-03-01'}
-                        r2 = requests.get(url, headers=headers, params=params)
-                        azr2= r2.json()["value"]
-                        if cde:
-                            print(json.dumps(azr2[j], indent=4, separators=(',', ': ')))
-                        ename=azr2[j]["name"]
-                        ername=ename.replace(".","-")
-                        id=azr2[j]["id"]
-                        prefix=tfp+"."+rg+'__'+ rname +'__'+ ername
-                        #print prefix
-                        rfilename=prefix+".tf"
-                        fr=open(rfilename, 'w')
-                        fr.write(az2tfmess)
-                        ename=azr2[j]["name"]
-                        thv=azr2[j]["properties"]["typeHandlerVersion"]
-                        pub=azr2[j]["properties"]["publisher"]
-                        typ=azr2[j]["properties"]["type"]
-                        auv=azr2[j]["properties"]["autoUpgradeMinorVersion"]
+                        # params = {'api-version': '2019-03-01'}
+                        # r2 = requests.get(url, headers=headers, params=params)
+                        # azr2= r2.json()["value"]
+                        # if cde:
+                            # print(json.dumps(azr2[j], indent=4, separators=(',', ': ')))
+                        # ename=azr2[j]["name"]
+                        # ername=ename.replace(".","-")
+                        # id=azr2[j]["id"]
+                        # prefix=tfp+"."+rg+'__'+ rname +'__'+ ername
+                        # #print prefix
+                        # rfilename=prefix+".tf"
+                        # fr=open(rfilename, 'w')
+                        # fr.write(az2tfmess)
+                        # ename=azr2[j]["name"]
+                        # thv=azr2[j]["properties"]["typeHandlerVersion"]
+                        # pub=azr2[j]["properties"]["publisher"]
+                        # typ=azr2[j]["properties"]["type"]
+                        # auv=azr2[j]["properties"]["autoUpgradeMinorVersion"]
 
 
-                        fr.write('resource ' + tfp + ' ' + rg + '__' + rname + '__'+ername +'{\n')
-                        fr.write('\t name = "' + ename + '"\n')
-                        fr.write('\t location = "'+ loc + '"\n')
-                        fr.write('\t resource_group_name = "'+ rgs + '"\n')
-                        fr.write('\t publisher = "'+ pub + '"\n')
-                        fr.write('\t type_handler_version = "'+ thv + '"\n')
-                        fr.write('\t virtual_machine_name = "'+ name + '"\n')
-                        fr.write('\t type = "'+ typ + '"\n')
-                        fr.write('\t auto_upgrade_minor_version = '+ str(auv).lower() + '\n')
+                        # fr.write('resource ' + tfp + ' ' + rg + '__' + rname + '__'+ername +'{\n')
+                        # fr.write('\t name = "' + ename + '"\n')
+                        # fr.write('\t location = "'+ loc + '"\n')
+                        # fr.write('\t resource_group_name = "'+ rgs + '"\n')
+                        # fr.write('\t publisher = "'+ pub + '"\n')
+                        # fr.write('\t type_handler_version = "'+ thv + '"\n')
+                        # fr.write('\t virtual_machine_name = "'+ name + '"\n')
+                        # fr.write('\t type = "'+ typ + '"\n')
+                        # fr.write('\t auto_upgrade_minor_version = '+ str(auv).lower() + '\n')
 
 
-                        try:
-                            set=azr2[j]["properties"]["settings"]
-                            slen=len(str(set))
+                        # try:
+                            # set=azr2[j]["properties"]["settings"]
+                            # slen=len(str(set))
                             
-                            if slen > 2:
-                                fr.write('settings = jsonencode( \n') 
-                                fr.write(json.dumps(azr2[j]["properties"]["settings"]))
-                                fr.write(')\n') 
-                        except KeyError:
-                            pass
+                            # if slen > 2:
+                                # fr.write('settings = jsonencode( \n') 
+                                # fr.write(json.dumps(azr2[j]["properties"]["settings"]))
+                                # fr.write(')\n') 
+                        # except KeyError:
+                            # pass
 
-        # tags block       
-                        try:
-                            mtags=azr2[j]["tags"]
-                            fr.write('tags = { \n')
-                            for key in mtags.keys():
-                                tval=mtags[key]
-                                tval=tval.replace('"',"'")
-                                fr.write(('\t "' + key + '"="' + tval + '"\n'))
-                            fr.write('}\n')
-                        except KeyError:
-                            pass
+        # # tags block       
+                        # try:
+                            # mtags=azr2[j]["tags"]
+                            # fr.write('tags = { \n')
+                            # for key in mtags.keys():
+                                # tval=mtags[key]
+                                # tval=tval.replace('"',"'")
+                                # fr.write(('\t "' + key + '"="' + tval + '"\n'))
+                            # fr.write('}\n')
+                        # except KeyError:
+                            # pass
 
-                        fr.write('}\n') 
-                        fr.close()   # close .tf file
+                        # fr.write('}\n') 
+                        # fr.close()   # close .tf file
 
-                        if cde:
-                            with open(rfilename) as f: 
-                                print (f.read())
+                        # if cde:
+                            # with open(rfilename) as f: 
+                                # print (f.read())
 
-                        tfrm.write('terraform state rm '+tfp+'.'+rg+'__'+rname +'__'+ername + '\n')
+                        # tfrm.write('terraform state rm '+tfp+'.'+rg+'__'+rname +'__'+ername + '\n')
 
-                        tfim.write('echo "importing ' + str(i) + ' of ' + str(count-1) + '"' + '\n')
+                        # tfim.write('echo "importing ' + str(i) + ' of ' + str(count-1) + '"' + '\n')
                         
-                        tfcomm='terraform import '+tfp+'.'+rg+'__'+rname+'__'+ername+' '+id+'\n'
-                        tfim.write(tfcomm)  
-            except KeyError:
-                pass
+                        # tfcomm='terraform import '+tfp+'.'+rg+'__'+rname+'__'+ername+' '+id+'\n'
+                        # tfim.write(tfcomm)  
+            # except KeyError:
+                # pass
 
-        # end for i loop
+        # # end for i loop
 
-        tfrm.close()
-        tfim.close()
-    #end stub
+        # tfrm.close()
+        # tfim.close()
+    # #end stub
  
 #
 # azurerm_virtual_machine_scale_set
@@ -5035,7 +5035,7 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
             #vmoswa = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["writeAcceleratorEnabled"]
             #
-            osvhd = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["ssh"]["publicKeys"][0]["keyData"]
+            
             #
             #vmimid = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["imageReference"]["id"]
 
@@ -5093,6 +5093,7 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
     # os_profile_windows_config
             try:  # winb
+                osvhd = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"]
                 winb = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"]
                 vmwau = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"]["enableAutomaticUpdates"]
                 vmwvma = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["windowsConfiguration"]["provisionVmAgent"]
@@ -5117,6 +5118,7 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
 
             try:  # linuxb" try :
+                osvhd = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["ssh"]["publicKeys"][0]["keyData"]
                 linuxb = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]
                 vmdispw = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["disablePasswordAuthentication"]
                 vmsshpath = azr[i]["properties"]["virtualMachineProfile"]["osProfile"]["linuxConfiguration"]["ssh"]["publicKeys"][0]["path"]
@@ -5163,7 +5165,10 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
                             ipcsrg = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["subnet"]["id"].split("/")[4].replace(".", "-").lower()
                             ipcsn = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["subnet"]["id"].split("/")[10].replace(".", "-")
-                            beapids = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["loadBalancerBackendAddressPools"]
+                            try:
+                                beapids = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["loadBalancerBackendAddressPools"]
+                            except KeyError:
+                                pass
                             #natrids = azr[i]["properties"]["virtualMachineProfile"]["networkProfile"]["networkInterfaceConfigurations"][j]["properties"]["ipConfigurations"][k]["properties"]["loadBalancerInboundNatPools"]
 
                             fr.write('\t\tname = "' + ipcn + '"\n')
@@ -5186,18 +5191,24 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
 
     # storage_profile_os_disk  block
             try:
-                vmosdiskname = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["name"]
                 vmosdiskcache = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["caching"]
                 vmoscreoption = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["createOption"]
 
                 fr.write('storage_profile_os_disk {\n')
-                fr.write('\tname = "' + vmosdiskname + '"\n')
                 fr.write('\tcaching = "' + vmosdiskcache + '"\n')
+                fr.write('\tcreate_option = "' + vmoscreoption + '"\n')
+                
+                try:
+                    vmosdiskname = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["name"]
+                    fr.write('\tname = "' + vmosdiskname + '"\n')
+                except KeyError:
+                    pass
+                    
                 # look at this
                 # if vmosacctype != "" :
                 ##    fr.write('\tmanaged_disk_type = "' +   vmosacctype + '"\n')
 
-                fr.write('\tcreate_option = "' + vmoscreoption + '"\n')
+                
 
                 try:
                     vmtype = azr[i]["properties"]["virtualMachineProfile"]["storageProfile"]["osDisk"]["osType"]
@@ -5297,36 +5308,36 @@ def azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2t
                 pass
         
 
-    # extensions:
-            try:
-                vmexts = azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"]
-                dcount = len(vmexts)
-                for j in range(0, dcount):
-                    vmextn=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["name"]
-                    fr.write('extension {\n')
-                    fr.write('\t name = "' + vmextn + '"\n')
-                    vmextpub=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["publisher"]
-                    vmexttyp=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["type"]
-                    vmextthv=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["typeHandlerVersion"]
+    # # extensions:
+            # try:
+                # vmexts = azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"]
+                # dcount = len(vmexts)
+                # for j in range(0, dcount):
+                    # vmextn=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["name"]
+                    # fr.write('extension {\n')
+                    # fr.write('\t name = "' + vmextn + '"\n')
+                    # vmextpub=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["publisher"]
+                    # vmexttyp=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["type"]
+                    # vmextthv=azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["typeHandlerVersion"]
                     
-                    fr.write('\t publisher = "' + vmextpub + '"\n')
-                    fr.write('\t type = "' + vmexttyp + '"\n')
-                    fr.write('\t type_handler_version = "' + vmextthv + '"\n')
-                    fr.write('\t protected_settings = ""\n')    
+                    # fr.write('\t publisher = "' + vmextpub + '"\n')
+                    # fr.write('\t type = "' + vmexttyp + '"\n')
+                    # fr.write('\t type_handler_version = "' + vmextthv + '"\n')
+                    # fr.write('\t protected_settings = ""\n')    
                     
-                    try:
-                        vmextset=str(ast.literal_eval(json.dumps(azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["settings"])))
-                        vmextset=vmextset.replace("'",'\\"')
-                        #print "vmextsett=" + vmextset
+                    # try:
+                        # vmextset=str(ast.literal_eval(json.dumps(azr[i]["properties"]["virtualMachineProfile"]["extensionProfile"]["extensions"][j]["properties"]["settings"])))
+                        # vmextset=vmextset.replace("'",'\\"')
+                        # #print "vmextsett=" + vmextset
                     
-                        fr.write('\t settings="' + vmextset + '"\n')                           
+                        # fr.write('\t settings="' + vmextset + '"\n')                           
 
-                    except KeyError:
-                        pass
+                    # except KeyError:
+                        # pass
                     
-                    fr.write('}\n')
-            except KeyError:
-                pass
+                    # fr.write('}\n')
+            # except KeyError:
+                # pass
 
 
 
@@ -8993,7 +9004,7 @@ azurerm_recovery_services_vault(crf,cde,crg,headers,requests,sub,json,az2tfmess,
 # 290_azurerm_virtual_machine
 azurerm_virtual_machine(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
 # 290_azurerm_virtual_machine_extension
-azurerm_virtual_machine_extension(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
+#azurerm_virtual_machine_extension(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
 # 295_azurerm_virtual_machine_scale_set
 azurerm_virtual_machine_scale_set(crf,cde,crg,headers,requests,sub,json,az2tfmess,cldurl)
 # 310_azurerm_automation_account
